@@ -1,0 +1,19 @@
+import { Router } from "express";
+import { UserRoutes } from "./presentation/user/routes";
+import { ClientRoutes } from "./presentation/client/routes";
+import { VehicleRoutes } from "./presentation/vehicle/routes";
+import { JobRoutes } from "./presentation/job/routes";
+
+export class AppRoutes {
+  static get routes(): Router {
+    const router = Router();
+
+    // rutas
+    router.use("/users", UserRoutes.routes);
+    router.use("/clients", ClientRoutes.routes);
+    router.use("/vehicles", VehicleRoutes.routes);
+    router.use("/jobs", JobRoutes.routes);
+
+    return router;
+  }
+}
