@@ -10,8 +10,9 @@ const port = envs.PORT;
 const prisma = new PrismaClient();
 
 // Middlewares
-app.use(express.json()); // Permite a tu servidor leer JSON
 app.use(cors()); // Permite que el frontend (React) hable con el Backend
+app.use(express.json()); // Permite a tu servidor leer JSON
+app.use(express.urlencoded({ extended: true }));
 
 // Rutas globales
 app.use("/api/v1", AppRoutes.routes);

@@ -37,4 +37,24 @@ export class AuthMiddleware {
       res.status(500).json({ error: "Internal Server error" });
     }
   }
+
+  static restricTo = (...allowedRoles: string[]) => {
+    return (req: Request, res: Response, next: NextFunction) => {
+      // Obtengo el usuario (AuthMiddleware.validateJWT)
+      const { user } = req.body;
+
+      if (!user) {
+        return res.status(500).json({ error: "User not found in request" });
+      }
+
+      // 2. Verificamos si el rol esta en la lista permitida
+      if (!allowedRoles.includes(user.role)) {
+        return res
+          .status(403)
+          .json({ error: "Access denied. You do not have permission." });
+      }
+
+      next();
+    };
+  };
 }

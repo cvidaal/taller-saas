@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { UserController } from "./controller";
+import { AuthMiddleware } from "../middlewares/auth.middleware";
 
 export class UserRoutes {
   static get routes(): Router {
@@ -10,7 +11,11 @@ export class UserRoutes {
     router.get("/", controller.getUsers);
     router.post("/", controller.createUser);
     router.put("/:id", controller.updateUser);
-    router.delete("/:id", controller.deleteUser);
+    router.delete(
+      "/:id",
+      [AuthMiddleware.restricTo("ADMIN")],
+      controller.deleteUser,
+    );
 
     return router;
   }
