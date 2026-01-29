@@ -1,16 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ResumeCard } from "../components/resumeCard";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 export const DashboardPage = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
-
-  const handleLogout = async () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
 
   // UseEffect hace esa tarea extra, solo se ejecuta al cargar la página y detecta si hay token válido.
   useEffect(() => {
@@ -34,7 +30,8 @@ export const DashboardPage = () => {
         setUser(data); // bien guardamoslos datos
       } catch (error) {
         console.error("Seguridad: Token falso detectado", error);
-        handleLogout();
+        localStorage.removeItem("token");
+        navigate("/login");
       }
     };
 
@@ -45,14 +42,11 @@ export const DashboardPage = () => {
     <div>
       <div className="p-4">
         <h1 className="text-2xl font-bold mb-4">Panel de Control</h1>
-
-        {/* Dentro de un botón se usa onClick */}
-        <button
-          className="px-4 py-2 font-bold text-white bg-red-600 rounded hover:bg-red-700 focus-outline-none"
-          onClick={handleLogout}
-        >
-          Cerrar sesión
-        </button>
+        <div className="flex flex-row">
+          <ResumeCard title="Clientes" value={124} />
+          <ResumeCard title="Vehículos" value={15} />
+          <ResumeCard title="Reparaciones" value={3} />
+        </div>
       </div>
     </div>
   );

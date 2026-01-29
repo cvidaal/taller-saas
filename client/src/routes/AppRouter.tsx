@@ -2,6 +2,9 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { LoginPage } from "../pages/LoginPage";
 import { DashboardPage } from "../pages/DashboardPage";
 import { PrivateRoute } from "./PrivateRoute";
+import { DashboardLayout } from "../components/layout/DashboardLayout";
+import { VehiclesPage } from "../pages/VehiclesPage";
+import { VehicleDetailPage } from "../pages/VehicleDetailPage";
 
 export const AppRouter = () => {
   return (
@@ -11,7 +14,11 @@ export const AppRouter = () => {
 
       {/* Privadas */}
       <Route element={<PrivateRoute />}>
-        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route element={<DashboardLayout />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/vehicles" element={<VehiclesPage />} />
+          <Route path="/vehicles/:id" element={<VehicleDetailPage />} />
+        </Route>
       </Route>
 
       {/* Redirecciones */}
