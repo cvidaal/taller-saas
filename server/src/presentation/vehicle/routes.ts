@@ -8,6 +8,7 @@ export class VehicleRoutes {
 
     router.get("/", controller.getVehicles);
     router.post("/", controller.createVehicle);
+    router.get("/:id", controller.getVehicleById);
     router.put("/:id", controller.updateVehicle);
     router.delete("/:id", controller.deleteVehicle);
 

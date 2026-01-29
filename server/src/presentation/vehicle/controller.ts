@@ -34,10 +34,32 @@ export class VehicleController {
     const vehicles = await prisma.vehicle.findMany({
       include: {
         client: true,
+        jobs: {
+          orderBy: { createdAt: "desc" },
+        },
       },
     });
 
     res.json(vehicles);
+  };
+
+  public getVehicleById = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const vehicle = await prisma.vehicle.findFirst({
+      where: {
+        id: id,
+      },
+      include: {
+        client: true,
+        jobs: true,
+      },
+    });
+
+    if (!vehicle) {
+      return res.status(404).json({ error: "Vehículo no encontrado" });
+    }
+
+    res.json(vehicle);
   };
 
   public updateVehicle = async (req: Request, res: Response) => {
