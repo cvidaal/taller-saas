@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getVehicles } from "../services/vehicle.service";
+import { deleteVehicle, getVehicles } from "../services/vehicle.service";
 import { Link } from "react-router-dom";
 import { CreateVehicleModal } from "../components/createVehicleModal";
 
@@ -40,18 +40,32 @@ export const VehiclesPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // UseEffect para ejecutar la carga de coches solo cuando se monte el componente.
-  useEffect(() => {
-    const loadVehicles = async () => {
-      try {
-        const data = await getVehicles();
-        setVehicles(data);
-      } catch (error) {
-        console.error("Error cargando vehículos", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadVehicles = async () => {
+    try {
+      const data = await getVehicles();
+      setVehicles(data);
+    } catch (error) {
+      console.error("Error cargando vehículos", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const handleDelete = async (id: string | number) => {
+    if (!window.confirm("¿Estás seguro de que quieres borrar este coche?")) {
+      return;
+    }
+
+    try {
+      await deleteVehicle(id);
+      loadVehicles();
+    } catch (error) {
+      alert("Error al eliminar el vehículo");
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
     loadVehicles();
   }, []);
 
@@ -128,7 +142,10 @@ export const VehiclesPage = () => {
                       <button className="text-indigo-600 hover:text-indigo-900 mr-4">
                         Editar
                       </button>
-                      <button className="text-red-600 hover:text-red-900">
+                      <button
+                        className="text-red-600 hover:text-red-900"
+                        onClick={() => handleDelete(car.id)}
+                      >
                         Borrar
                       </button>
                     </div>
@@ -143,6 +160,7 @@ export const VehiclesPage = () => {
       <CreateVehicleModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        onVehicleCreated={loadVehicles}
       />
     </div>
   );

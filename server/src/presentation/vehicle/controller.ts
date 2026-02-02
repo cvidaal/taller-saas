@@ -8,11 +8,14 @@ export class VehicleController {
   public createVehicle = async (req: Request, res: Response) => {
     try {
       const { brand, model, year, licensePlate, clientId } = req.body;
-      if (!brand) res.status(400).json({ error: "Brand is not exist" });
-      if (!model) res.status(400).json({ error: "Model is not exist" });
-      if (!year) res.status(400).json({ error: "Year is not exist" });
+      if (!brand) return res.status(400).json({ error: "Brand is not exist" });
+      if (!model) return res.status(400).json({ error: "Model is not exist" });
+      if (!year) return res.status(400).json({ error: "Year is not exist" });
       if (!licensePlate)
-        res.status(400).json({ error: "LicensePlate is not exist" });
+        return res.status(400).json({ error: "LicensePlate is not exist" });
+
+      if (!clientId)
+        return res.status(400).json({ error: "Falta seleccionar un cliente" });
 
       const newVehicle = await prisma.vehicle.create({
         data: {

@@ -1,10 +1,80 @@
+import { useEffect, useState } from "react";
+import { getClients, type Client } from "../services/client.service";
+import { createVehicle } from "../services/vehicle.service";
+
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  onVehicleCreated?: () => void;
 }
 
-export const CreateVehicleModal = ({ isOpen, onClose }: Props) => {
-  // Si esta abierta no hacemos nada
+export const CreateVehicleModal = ({
+  isOpen,
+  onClose,
+  onVehicleCreated,
+}: Props) => {
+  // 1. Estado para la lista de clientes.
+  const [clients, setClients] = useState<Client[]>([]);
+
+  // 2. Estado para el formulario
+  const [formData, setFormData] = useState({
+    brand: "",
+    model: "",
+    year: new Date().getFullYear(),
+    licensePlate: "",
+    clientId: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+
+  // Cargar clientes cuando se abre el modal
+  useEffect(() => {
+    if (isOpen) {
+      getClients().then((data) => setClients(data));
+    }
+  }, [isOpen]);
+
+  // 4. Manejador genérico de inputs
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // 5. Enviar al servidor
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      await createVehicle({
+        ...formData,
+        year: Number(formData.year),
+      });
+
+      alert("Vehículo creado con éxito!");
+      if (onVehicleCreated) onVehicleCreated();
+      onClose();
+
+      // Limpio formulario
+      setFormData({
+        brand: "",
+        model: "",
+        year: 2024,
+        licensePlate: "",
+        clientId: "",
+      });
+    } catch (error) {
+      alert("Error al crear el vehículo. Revisa los datos");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -45,21 +115,108 @@ export const CreateVehicleModal = ({ isOpen, onClose }: Props) => {
         </div>
 
         {/* Formulario */}
-        <div className="p-6">
-          <p className="text-gray-500 mb-4">Aquí inputs</p>
-          {/* Botones acción */}
-          <div className="flex justify-end gap-3 mt-6">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Sector de cliente */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Dueño (Cliente)
+            </label>
+            <select
+              name="clientId"
+              value={formData.clientId}
+              onChange={handleChange}
+              required
+              className="w-full border rounded p-2 bg-white"
+            >
+              <option value="">-- Seleccionar un cliente --</option>
+              {clients.map((client) => (
+                <option key={client.id} value={client.id}>
+                  {client.firstName} {client.lastName}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Marca
+              </label>
+              <input
+                type="text"
+                name="brand"
+                required
+                className="w-full border rounded p-2"
+                placeholder="Ej: Toyota"
+                value={formData.brand}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Modelo
+              </label>
+              <input
+                type="text"
+                name="model"
+                required
+                className="w-full border rounded p-2"
+                placeholder="Ej: Corolla"
+                value={formData.model}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Matrícula
+              </label>
+              <input
+                type="text"
+                name="licensePlate"
+                required
+                className="w-full border rounded p-2"
+                placeholder="1234-BBB"
+                value={formData.licensePlate}
+                onChange={handleChange}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Año
+              </label>
+              <input
+                type="number"
+                name="year"
+                required
+                className="w-full border rounded p-2"
+                value={formData.year}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
             <button
+              type="button"
               onClick={onClose}
               className="px-4 py-2 text-gray-700 bg-gray-100 rounded hover:bg-gray-200"
             >
               Cancelar
             </button>
-            <button className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700">
-              Guardar
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700 disabled:opacity-50"
+            >
+              {loading ? "Guardando..." : "Guardar Vehículo"}
             </button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );
