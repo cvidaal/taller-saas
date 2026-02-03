@@ -4,13 +4,13 @@ import { Link } from "react-router-dom";
 import { CreateVehicleModal } from "../components/createVehicleModal";
 
 interface Job {
-  id: number;
+  id: string;
   status: string; // 'PENDING', 'IN_PROGRESS, 'COMPLETED'
   description?: string;
 }
 
 interface Vehicle {
-  id: number;
+  id: string;
   brand: string;
   model: string;
   year: number;

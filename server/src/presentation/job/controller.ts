@@ -9,12 +9,14 @@ export class JobController {
   public createJob = async (req: Request, res: Response) => {
     try {
       const { vehicleId, assignedMechanicId, description, cost } = req.body;
-      if (!vehicleId) res.status(500).json({ error: "Vehicle is required" });
+      if (!vehicleId)
+        return res.status(400).json({ error: "Vehicle is required" });
       if (!assignedMechanicId)
-        res.status(500).json({ error: "Mechanic is required" });
+        return res.status(400).json({ error: "Mechanic is required" });
       if (!description)
-        res.status(500).json({ error: "Description is required" });
-      if (!cost) res.status(500).json({ error: "Cost is required" });
+        return res.status(400).json({ error: "Description is required" });
+      if (cost === undefined)
+        return res.status(400).json({ error: "Cost is required" });
 
       const newJob = await prisma.job.create({
         data: {

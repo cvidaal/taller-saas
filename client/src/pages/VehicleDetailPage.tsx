@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getVehicleById } from "../services/vehicle.service";
+import { CreateJobModal } from "../components/createJobModal";
 
 interface Client {
   id: string;
@@ -34,21 +35,23 @@ export const VehicleDetailPage = () => {
 
   const [vehicle, setVehicle] = useState<VehicleDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const loadVehicle = async () => {
+    try {
+      if (!id) return;
+
+      const data = await getVehicleById(id!);
+      setVehicle(data);
+    } catch (error) {
+      console.error("Error cargando vehículos", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Por ejemplo: este useEffect se usa cada vez que el id se refresca o es nuevo.
   useEffect(() => {
-    const loadVehicle = async () => {
-      try {
-        if (!id) return;
-
-        const data = await getVehicleById(id!);
-        setVehicle(data);
-      } catch (error) {
-        console.error("Error cargando vehículos", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     loadVehicle(); // Hay que llamar la función en el useEffect
   }, [id]);
 
@@ -58,12 +61,22 @@ export const VehicleDetailPage = () => {
   if (!vehicle) return <div>No se encontró el vehículo</div>;
   return (
     <div>
-      <button
-        onClick={() => navigate("/vehicles")}
-        className="p-2  bg-blue-500 hover:bg-blue-700 font-medium mb-4 text-white  flex items-center gap-2 rounded"
-      >
-        ⏪ Volver
-      </button>
+      <div className="flex justify-between mb-4">
+        <button
+          onClick={() => navigate("/vehicles")}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+        >
+          ⏪ Volver
+        </button>
+
+        <button
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+          onClick={() => setIsModalOpen(true)}
+        >
+          + Nueva Reparación
+        </button>
+      </div>
+
       {/*Marca, modelo, matrícula */}
       <h1 className="text-3xl font-bold mb-6">
         {vehicle.brand} {vehicle.model} ({vehicle.licensePlate})
@@ -114,6 +127,15 @@ export const VehicleDetailPage = () => {
           )}
         </div>
       </div>
+
+      {id && (
+        <CreateJobModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          vehicleId={id}
+          onJobCreated={loadVehicle}
+        />
+      )}
     </div>
   );
 };

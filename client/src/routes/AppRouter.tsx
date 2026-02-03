@@ -5,6 +5,7 @@ import { PrivateRoute } from "./PrivateRoute";
 import { DashboardLayout } from "../components/layout/DashboardLayout";
 import { VehiclesPage } from "../pages/VehiclesPage";
 import { VehicleDetailPage } from "../pages/VehicleDetailPage";
+import { ClientsPage } from "../pages/ClientsPage";
 
 export const AppRouter = () => {
   return (
@@ -18,6 +19,7 @@ export const AppRouter = () => {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/vehicles" element={<VehiclesPage />} />
           <Route path="/vehicles/:id" element={<VehicleDetailPage />} />
+          <Route path="/clients" element={<ClientsPage />} />
         </Route>
       </Route>
 
