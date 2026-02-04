@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getVehicleById } from "../services/vehicle.service";
 import { CreateJobModal } from "../components/createJobModal";
+import { updateJobStatus } from "../services/job.service";
+import type React from "react";
 
 interface Client {
   id: string;
@@ -17,6 +19,7 @@ interface Job {
   status: string;
   cost: string;
   createdAt: string;
+  closedAt: string;
 }
 
 interface VehicleDetail {
@@ -54,6 +57,17 @@ export const VehicleDetailPage = () => {
   useEffect(() => {
     loadVehicle(); // Hay que llamar la función en el useEffect
   }, [id]);
+
+  // Función para manejar el clic
+  const handleStatusChange = async (jobId: string, newStatus: string) => {
+    try {
+      await updateJobStatus(jobId, newStatus);
+      await loadVehicle();
+    } catch (error) {
+      alert("No se pudo cambiar el estado, Revisa la consola");
+      console.error(error);
+    }
+  };
 
   if (loading) {
     return <div className="p-4">Cargando vehículo...</div>;
@@ -110,16 +124,66 @@ export const VehicleDetailPage = () => {
                   key={job.id}
                   className="border-l-4 border-blue-500 pl-3 bg-gray-50 p-2 rounded"
                 >
-                  <div className="font-bold text-gray-800">
-                    {job.description}
+                  {/* Info del trabajo */}
+                  <div>
+                    <div className="font-bold text-gray-800">
+                      {job.description}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {new Date(job.createdAt).toLocaleString("es-ES", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}{" "}
+                      -<span className="font-mono ml-1">{job.cost}€</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-sm mt-1">
-                    <span className="text-gray-500">
-                      {new Date(job.createdAt).toLocaleDateString()}
-                    </span>
-                    <span className="font-mono bg-white px-2 rounded border">
-                      {job.status}
-                    </span>
+
+                  {/* Derecha: Botonera inteligente */}
+                  <div className="flex gap-2">
+                    {job.status === "PENDING" && (
+                      <button
+                        onClick={() =>
+                          handleStatusChange(job.id, "IN_PROGRESS")
+                        }
+                        className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-1 px-3 rounded shadow transition-colors"
+                      >
+                        ▶️ Empezar
+                      </button>
+                    )}
+
+                    {job.status === "IN_PROGRESS" && (
+                      <button
+                        onClick={() => handleStatusChange(job.id, "COMPLETED")}
+                        className="bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-1 px-3 rounded shadow transition-colors"
+                      >
+                        ✅ Finalizar
+                      </button>
+                    )}
+
+                    {job.status === "COMPLETED" && (
+                      <div className="flex gap-2">
+                        <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded border border-green-200">
+                          Completado el{" "}
+                          {job.closedAt
+                            ? new Date(job.closedAt).toLocaleString("es-ES", {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })
+                            : ""}
+                        </span>
+                        <button
+                          onClick={() =>
+                            handleStatusChange(job.id, "IN_PROGRESS")
+                          }
+                          className="bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold py-1 px-3 rounded shadow transition-colors"
+                        >
+                          🔧 Reabrir
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </li>
               ))}

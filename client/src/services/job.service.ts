@@ -40,3 +40,28 @@ export const createJob = async (jobData: createJobDTO) => {
     throw error;
   }
 };
+
+export const updateJobStatus = async (jobId: string, newStatus: string) => {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("No token found");
+
+  try {
+    const response = await fetch(`${API_URL}/jobs/${jobId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ status: newStatus }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Error actualizando el estado");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error en updateJobStatus", error);
+    throw error;
+  }
+};

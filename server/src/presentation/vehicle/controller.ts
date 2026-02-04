@@ -54,7 +54,11 @@ export class VehicleController {
       },
       include: {
         client: true,
-        jobs: true,
+        jobs: {
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
       },
     });
 
