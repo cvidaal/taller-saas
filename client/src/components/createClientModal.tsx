@@ -1,16 +1,23 @@
-import { useState } from "react";
-import { createClient } from "../services/client.service";
+import { useEffect, useState } from "react";
+import {
+  createClient,
+  updateClient,
+  type Client,
+} from "../services/client.service";
+import { notify } from "../utils/notify";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   onClientCreated?: () => void;
+  clientToEdit?: Client;
 }
 
 export const CreateClientModal = ({
   isOpen,
   onClose,
   onClientCreated,
+  clientToEdit,
 }: Props) => {
   // 2. Estado para el formulario
   const [formData, setFormData] = useState({
@@ -38,9 +45,15 @@ export const CreateClientModal = ({
     setLoading(true);
 
     try {
-      await createClient(formData);
+      const savePromise = clientToEdit
+        ? updateClient(clientToEdit.id, formData)
+        : createClient(formData);
 
-      alert("Cliente creado con éxito!");
+      await notify.promise(savePromise, {
+        loading: "Guardando cliente...",
+        success: "¡Cliente guardado correctamente! 🎉",
+        error: "Error al guardar. Revisa los datos.",
+      });
       if (onClientCreated) onClientCreated();
       onClose();
 
@@ -52,12 +65,30 @@ export const CreateClientModal = ({
         email: "",
       });
     } catch (error) {
-      alert("Error al crear el vehículo. Revisa los datos");
+      await notify.error("Error al guardar cliente");
       console.error(error);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (clientToEdit) {
+      setFormData({
+        firstName: clientToEdit.firstName,
+        lastName: clientToEdit.lastName,
+        phone: clientToEdit.phone ?? "",
+        email: clientToEdit.email ?? "",
+      });
+    } else {
+      setFormData({
+        firstName: "",
+        lastName: "",
+        phone: "",
+        email: "",
+      });
+    }
+  }, [clientToEdit]);
 
   if (!isOpen) return null;
 
@@ -75,7 +106,9 @@ export const CreateClientModal = ({
       >
         {/* Cabecera */}
         <div className="flex justify-between items-center p-4 border-b">
-          <h3 className="text-lg font-semibold text-gray-900">Nuevo Cliente</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            {clientToEdit ? "Editar Cliente" : "Nuevo Cliente"}
+          </h3>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-1 transition-colors"
@@ -172,7 +205,7 @@ export const CreateClientModal = ({
               disabled={loading}
               className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700 disabled:opacity-50"
             >
-              {loading ? "Guardando..." : "Guardar Vehículo"}
+              {loading ? "Guardando..." : "Guardar Cliente"}
             </button>
           </div>
         </form>

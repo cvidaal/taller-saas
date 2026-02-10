@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { deleteVehicle, getVehicles } from "../services/vehicle.service";
 import { Link } from "react-router-dom";
 import { CreateVehicleModal } from "../components/createVehicleModal";
+import type { Client } from "../services/client.service";
 
 interface Job {
   id: string;
@@ -17,6 +18,8 @@ interface Vehicle {
   licensePlate: string;
   jobs?: Job[];
   status: "En Taller" | "Terminado" | "Esperando Piezas";
+  clientId: string;
+  client?: Client;
 }
 
 const getVehicleStatus = (jobs?: Job[]) => {
@@ -38,6 +41,30 @@ export const VehiclesPage = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [vehicleToEdit, setVehicleToEdit] = useState<Vehicle | null>(null);
+
+  // Filtramos la lista original de vehículos.
+  const filteredVehicles = vehicles.filter((vehicle) => {
+    const term = searchTerm.toLowerCase();
+
+    // Buscamos coincidencia
+    const matchesPlate = vehicle.licensePlate.toLowerCase().includes(term);
+    const matchesBrand = vehicle.brand.toLowerCase().includes(term);
+    const matchesModel = vehicle.model.toLowerCase().includes(term);
+
+    return matchesPlate || matchesBrand || matchesModel;
+  });
+
+  const openNewModal = () => {
+    setVehicleToEdit(null);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (vehicle: Vehicle) => {
+    setVehicleToEdit(vehicle);
+    setIsModalOpen(true);
+  };
 
   // UseEffect para ejecutar la carga de coches solo cuando se monte el componente.
   const loadVehicles = async () => {
@@ -67,7 +94,7 @@ export const VehiclesPage = () => {
 
   useEffect(() => {
     loadVehicles();
-  }, []);
+  }, [vehicles]);
 
   if (loading) {
     return <div className="p-4">Cargando vehículos...</div>;
@@ -79,10 +106,21 @@ export const VehiclesPage = () => {
         <h1 className="text-2xl font-bold text-gray-800">Vehículos</h1>
         <button
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
-          onClick={() => setIsModalOpen(true)}
+          onClick={openNewModal}
         >
           + Nuevo Vehículo
         </button>
+      </div>
+
+      {/* Buscador */}
+      <div>
+        <input
+          type="text"
+          placeholder="🔎 Buscar por matrícula, marca o modelo..."
+          className="mb-3 w-full md:w-1/3 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
       {/* Tabla */}
@@ -107,7 +145,7 @@ export const VehiclesPage = () => {
           </thead>
           {/* Cuerpo de la tabla */}
           <tbody className="divide-y divide-gray-200">
-            {vehicles.map((car) => {
+            {filteredVehicles.map((car) => {
               const statusInfo = getVehicleStatus(car.jobs);
 
               return (
@@ -139,7 +177,10 @@ export const VehiclesPage = () => {
                   {/* Acciones */}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center justfiy-center gap-4">
-                      <button className="text-indigo-600 hover:text-indigo-900 mr-4">
+                      <button
+                        onClick={() => openEditModal(car)}
+                        className="text-indigo-600 hover:text-indigo-900 mr-4"
+                      >
                         Editar
                       </button>
                       <button
@@ -161,6 +202,7 @@ export const VehiclesPage = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onVehicleCreated={loadVehicles}
+        vehicleToEdit={vehicleToEdit}
       />
     </div>
   );

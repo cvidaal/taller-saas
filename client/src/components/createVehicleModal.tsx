@@ -1,17 +1,29 @@
 import { useEffect, useState } from "react";
 import { getClients, type Client } from "../services/client.service";
-import { createVehicle } from "../services/vehicle.service";
+import {
+  createVehicle,
+  updateVehicle,
+  type CreateVehicleDto,
+} from "../services/vehicle.service";
+import { notify } from "../utils/notify";
+
+export interface Vehicle extends CreateVehicleDto {
+  id: string;
+  // client?: Client
+}
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   onVehicleCreated?: () => void;
+  vehicleToEdit?: Vehicle | null;
 }
 
 export const CreateVehicleModal = ({
   isOpen,
   onClose,
   onVehicleCreated,
+  vehicleToEdit,
 }: Props) => {
   // 1. Estado para la lista de clientes.
   const [clients, setClients] = useState<Client[]>([]);
@@ -32,7 +44,25 @@ export const CreateVehicleModal = ({
     if (isOpen) {
       getClients().then((data) => setClients(data));
     }
-  }, [isOpen]);
+
+    if (vehicleToEdit) {
+      setFormData({
+        brand: vehicleToEdit.brand,
+        model: vehicleToEdit.model,
+        licensePlate: vehicleToEdit.licensePlate,
+        year: vehicleToEdit.year,
+        clientId: vehicleToEdit.clientId,
+      });
+    } else {
+      setFormData({
+        brand: "",
+        model: "",
+        licensePlate: "",
+        year: 0,
+        clientId: "",
+      });
+    }
+  }, [isOpen, vehicleToEdit]);
 
   // 4. Manejador genérico de inputs
   const handleChange = (
@@ -50,12 +80,21 @@ export const CreateVehicleModal = ({
     setLoading(true);
 
     try {
-      await createVehicle({
+      const dataToSend = {
         ...formData,
         year: Number(formData.year),
+      };
+
+      const savePromise = vehicleToEdit
+        ? updateVehicle(vehicleToEdit.id, dataToSend)
+        : createVehicle(formData);
+
+      await notify.promise(savePromise, {
+        loading: "Guardando vehículo...",
+        success: "¡Vehículo guardado correctamente! 🎉",
+        error: "Error al guardar. Revisa los datos.",
       });
 
-      alert("Vehículo creado con éxito!");
       if (onVehicleCreated) onVehicleCreated();
       onClose();
 
@@ -68,7 +107,7 @@ export const CreateVehicleModal = ({
         clientId: "",
       });
     } catch (error) {
-      alert("Error al crear el vehículo. Revisa los datos");
+      notify.error("Error al crear el vehículo. Revisa los datos");
       console.error(error);
     } finally {
       setLoading(false);
@@ -92,7 +131,7 @@ export const CreateVehicleModal = ({
         {/* Cabecera */}
         <div className="flex justify-between items-center p-4 border-b">
           <h3 className="text-lg font-semibold text-gray-900">
-            Nuevo Vehículo
+            {vehicleToEdit ? "Editar Vehículo" : "Nuevo Vehículo"}
           </h3>
           <button
             onClick={onClose}
@@ -213,7 +252,11 @@ export const CreateVehicleModal = ({
               disabled={loading}
               className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700 disabled:opacity-50"
             >
-              {loading ? "Guardando..." : "Guardar Vehículo"}
+              {loading
+                ? "Guardando..."
+                : vehicleToEdit
+                  ? "Actualizar Vehículo"
+                  : "Guardar Vehículo"}
             </button>
           </div>
         </form>

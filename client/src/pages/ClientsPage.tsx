@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
-import { getClients, type Client } from "../services/client.service";
+import {
+  deleteClient,
+  getClients,
+  type Client,
+} from "../services/client.service";
 import { CreateClientModal } from "../components/createClientModal";
+import { notify } from "../utils/notify";
 
 export const ClientsPage = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [clientToEdit, setClientToEdit] = useState<Client | null>(null);
 
   const loadClients = async () => {
     try {
@@ -18,9 +24,28 @@ export const ClientsPage = () => {
     }
   };
 
+  const openEditModal = (client: Client) => {
+    setClientToEdit(client);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id: string | number) => {
+    if (!window.confirm("¿Estás seguro de que quieres borrar este cliente?")) {
+      return;
+    }
+
+    try {
+      await deleteClient(id);
+      loadClients();
+    } catch (error) {
+      notify.error("Error al eliminar al cliente");
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     loadClients();
-  }, []);
+  }, [clients]);
 
   return (
     <div>
@@ -52,6 +77,9 @@ export const ClientsPage = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Correo
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Acciones
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -68,6 +96,22 @@ export const ClientsPage = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {client.email || "-"}
                   </td>
+                  <td>
+                    <div className="flex items-center justfiy-center gap-4">
+                      <button
+                        onClick={() => openEditModal(client)}
+                        className="text-indigo-600 hover:text-indigo-900 mr-4"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        className="text-red-600 hover:text-red-900"
+                        onClick={() => handleDelete(client.id)}
+                      >
+                        Borrar
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -79,6 +123,7 @@ export const ClientsPage = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onClientCreated={loadClients}
+        clientToEdit={clientToEdit!}
       />
     </div>
   );

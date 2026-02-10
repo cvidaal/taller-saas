@@ -1,4 +1,13 @@
+import { notify } from "../utils/notify";
+
 const API_URL = import.meta.env.VITE_API_URL;
+
+export interface UpdateVehicleData {
+  brand?: string;
+  model?: string;
+  year?: number;
+  licensePlate?: string;
+}
 
 export interface CreateVehicleDto {
   brand: string;
@@ -117,9 +126,39 @@ export const deleteVehicle = async (id: string | number) => {
       throw new Error("Error al eliminar vehículo");
     }
 
-    alert(`Vehículo ${id} eliminado correctamente`);
+    notify.success("Vehículo eliminado correctamente");
   } catch (error) {
+    notify.error("Error al eliminar vehículo. Revisa la conexión");
     console.error("Error en DeleteVehicle", error);
+    throw error;
+  }
+};
+
+export const updateVehicle = async (id: string, data: UpdateVehicleData) => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    throw new Error("No hay token disponible");
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/vehicles/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al actualizar el vehículo");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error en UpdateVehicle", error);
     throw error;
   }
 };

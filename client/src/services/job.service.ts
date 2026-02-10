@@ -7,13 +7,25 @@ export interface createJobDTO {
   cost: number;
 }
 
+export interface UpdateJobDto {
+  description?: string;
+  cost?: number;
+  status?: string;
+}
+
 export interface Job {
   id: string;
+  vehicleId: string;
+  assignedMechanicId: string;
+  mechanic?: {
+    name: string;
+    email: string;
+  };
   description: string;
   status: string;
   cost: number;
   createdAt: string;
-  closedAt?: string;
+  closedAt: string;
 }
 
 export const createJob = async (jobData: createJobDTO) => {
@@ -41,7 +53,7 @@ export const createJob = async (jobData: createJobDTO) => {
   }
 };
 
-export const updateJobStatus = async (jobId: string, newStatus: string) => {
+export const updateJob = async (jobId: string, data: UpdateJobDto) => {
   const token = localStorage.getItem("token");
   if (!token) throw new Error("No token found");
 
@@ -52,7 +64,7 @@ export const updateJobStatus = async (jobId: string, newStatus: string) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ status: newStatus }),
+      body: JSON.stringify(data),
     });
 
     if (!response.ok) {
@@ -60,6 +72,29 @@ export const updateJobStatus = async (jobId: string, newStatus: string) => {
     }
 
     return await response.json();
+  } catch (error) {
+    console.error("Error en updateJobStatus", error);
+    throw error;
+  }
+};
+
+export const deleteJob = async (id: string) => {
+  const token = localStorage.getItem("token");
+
+  if (!token) throw new Error("No token found");
+
+  try {
+    const response = await fetch(`${API_URL}/jobs/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Error actualizando el estado");
+    }
   } catch (error) {
     console.error("Error en updateJobStatus", error);
     throw error;

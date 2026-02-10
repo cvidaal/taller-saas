@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
-import { createJob } from "../services/job.service";
+import { createJob, updateJob, type Job } from "../services/job.service";
 import { getUsers, type User } from "../services/user.service";
+import { notify } from "../utils/notify";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   onJobCreated?: () => void;
   vehicleId: string;
+  jobToEdit?: Job | null;
 }
 
 export const CreateJobModal = ({
@@ -14,24 +16,37 @@ export const CreateJobModal = ({
   onClose,
   onJobCreated,
   vehicleId,
+  jobToEdit,
 }: Props) => {
   // 2. Estado para el formulario
   const [formData, setFormData] = useState({
-    vehicleId: vehicleId,
-    assignedMechanicId: "",
     description: "",
     cost: 0,
+    assignedMechanicId: "",
   });
 
-  const [users, setUsers] = useState<User[]>([]);
-
+  const [mechanics, setMechanics] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
-      getUsers().then((data) => setUsers(data));
+      getUsers().then((data) => setMechanics(data));
     }
-  }, [isOpen]);
+
+    if (jobToEdit) {
+      setFormData({
+        description: jobToEdit.description,
+        cost: jobToEdit.cost,
+        assignedMechanicId: jobToEdit.assignedMechanicId,
+      });
+    } else {
+      setFormData({
+        description: "",
+        cost: 0,
+        assignedMechanicId: "",
+      });
+    }
+  }, [isOpen, jobToEdit]);
 
   // 4. Manejador genérico de inputs
   const handleChange = (
@@ -48,22 +63,39 @@ export const CreateJobModal = ({
     e.preventDefault();
     setLoading(true);
 
-    try {
-      await createJob(formData);
+    if (!formData.assignedMechanicId) {
+      notify.error("Debes asignar un mecánico");
+      setLoading(false);
+      return;
+    }
 
-      alert("Reparación creada con éxito!");
+    try {
+      const dataToSend = {
+        description: formData.description,
+        cost: Number(formData.cost),
+        assignedMechanicId: formData.assignedMechanicId,
+      };
+
+      const savePromise = jobToEdit
+        ? updateJob(jobToEdit.id, dataToSend)
+        : createJob({ ...dataToSend, vehicleId });
+
+      await notify.promise(savePromise, {
+        loading: "Guardando reparación...",
+        success: "Reparación guardada! 🔧",
+        error: "Error al guardar al datos",
+      });
+
       if (onJobCreated) onJobCreated();
       onClose();
 
       // Limpio formulario
       setFormData({
-        vehicleId: "",
-        assignedMechanicId: "",
         description: "",
         cost: 0,
+        assignedMechanicId: "",
       });
     } catch (error) {
-      alert("Error al crear la reparación. Revisa los datos");
       console.error(error);
     } finally {
       setLoading(false);
@@ -87,7 +119,7 @@ export const CreateJobModal = ({
         {/* Cabecera */}
         <div className="flex justify-between items-center p-4 border-b">
           <h3 className="text-lg font-semibold text-gray-900">
-            Nueva Reparación
+            {jobToEdit ? "Editar reparación" : "Nueva reparación"}
           </h3>
           <button
             onClick={onClose}
@@ -124,9 +156,9 @@ export const CreateJobModal = ({
                 className="w-full border rounded p-2 bg-white"
               >
                 <option value="">-- Seleccionar un mecánico</option>
-                {users.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.name}
+                {mechanics.map((mechanic) => (
+                  <option key={mechanic.id} value={mechanic.id}>
+                    {mechanic.name}
                   </option>
                 ))}
               </select>
