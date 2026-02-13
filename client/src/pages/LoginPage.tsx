@@ -2,17 +2,17 @@ import type React from "react";
 import { useState } from "react";
 import { login } from "../services/auth.service";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { notify } from "../utils/notify";
 
 export const LoginPage = () => {
   // Memoría para nuestros campos
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  // useNavigate
   const navigate = useNavigate();
-
-  // Estado para mensajes de error visuales
   const [error, setError] = useState<string | null>(null);
+
+  const { login: loginContext } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,10 +20,13 @@ export const LoginPage = () => {
 
     try {
       const data = await login(email, password);
-      localStorage.setItem("token", data.token);
+      loginContext(data.user, data.token);
+      notify.success(`¡Bienvenido, ${data.user.name}!`);
       navigate("/dashboard");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (error) {
+      setError("Credenciales incorrectas");
+      notify.error("Error al iniciar sesión");
+      console.error(error);
     }
   };
   return (

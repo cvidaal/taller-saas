@@ -117,7 +117,7 @@ export const VehiclesPage = () => {
         <input
           type="text"
           placeholder="🔎 Buscar por matrícula, marca o modelo..."
-          className="mb-3 w-full md:w-1/3 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+          className="mb-3 w-full max-w-md p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />

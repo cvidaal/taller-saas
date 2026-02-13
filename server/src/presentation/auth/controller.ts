@@ -19,14 +19,14 @@ export class AuthController {
 
       // Si usuario es null error 400
       if (!user) {
-        return res.status(400).json({ error: "Invalid credentials" });
+        return res.status(400).json({ error: "Credenciales incorrectas" });
       }
 
       // Comparar contraseña
       const isMatching = await BcryptAdapter.compare(password, user.password);
 
       if (!isMatching) {
-        return res.status(400);
+        return res.status(400).json({ error: "Credenciales incorrectas" });
       }
 
       // Para generar el token usamos datos seguros.
@@ -38,7 +38,7 @@ export class AuthController {
 
       const { password: _, ...userWithoutPassword } = user;
 
-      res.json({
+      return res.status(200).json({
         user: userWithoutPassword,
         token: token,
       });

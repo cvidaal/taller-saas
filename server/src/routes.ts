@@ -5,6 +5,7 @@ import { VehicleRoutes } from "./presentation/vehicle/routes";
 import { JobRoutes } from "./presentation/job/routes";
 import { AuthRoutes } from "./presentation/auth/routes";
 import { AuthMiddleware } from "./presentation/middlewares/auth.middleware";
+import { DashboardRoutes } from "./presentation/dashboard/routes";
 
 export class AppRoutes {
   static get routes(): Router {
@@ -21,6 +22,7 @@ export class AppRoutes {
     router.use("/clients", ClientRoutes.routes);
     router.use("/vehicles", VehicleRoutes.routes);
     router.use("/jobs", JobRoutes.routes);
+    router.use("/dashboard/", DashboardRoutes.routes);
 
     return router;
   }

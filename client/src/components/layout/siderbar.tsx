@@ -1,6 +1,20 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { getInitials } from "../../utils/getInitials";
 
 export const Sidebar = () => {
+  const location = useLocation();
+  const { user, logout } = useAuth();
+
+  const getLinkClass = (path: string) => {
+    const isActive = location.pathname === path;
+    return `block px-4 py-2.5 rounded transition-colors flex items-center gap-2 ${
+      isActive
+        ? "bg-blue-600 text-white font-medium"
+        : "text-gray-300 hover:bg-gray-800 hover:text-white"
+    }`;
+  };
+
   return (
     <aside className="w-64 bg-gray-900 text-white h-screen flex flex-col">
       {/* Logo */}
@@ -8,41 +22,50 @@ export const Sidebar = () => {
         Taller Manager 🔧
       </div>
 
-      {/* Menu */}
-      <nav className="flex-1 px-4 py-6 space-y-2">
-        {/* Dashboard */}
-        <Link
-          to="/dashboard"
-          className="block px-4 py-2.5 hover:bg-gray-800 rounded transition-colors"
-        >
-          📊 Panel Principal
+      {/* 2. Navegación */}
+      <nav className="flex-1 px-3 py-6 space-y-1">
+        <Link to="/dashboard" className={getLinkClass("/dashboard")}>
+          📊 <span>Panel Principal</span>
         </Link>
-        {/* Vehicles */}
-        <Link
-          to="/vehicles"
-          className="block px-4 py-2.5 hover:bg-gray-800 rounded transition-colors"
-        >
-          🏎️ Vehículos
+
+        <Link to="/vehicles" className={getLinkClass("/vehicles")}>
+          🏎️ <span>Vehículos</span>
         </Link>
-        <Link
-          to="/clients"
-          className="block px-4 py-2.5 hover:bg-gray-800 rounded transition-colors"
-        >
-          👥 Clientes
+
+        <Link to="/clients" className={getLinkClass("/clients")}>
+          👥 <span>Clientes</span>
         </Link>
-        {/* Clientes */}
       </nav>
 
       <div className="p-4 border-t border-gray-700">
-        <button
-          className="w-full px-4 py-2 text-sm font-medium text-white bg-red-600 rounded hover:bg-red-700"
-          onClick={() => {
-            localStorage.removeItem("token");
-            window.location.href = "/login";
-          }}
-        >
-          Cerrar sesión
-        </button>
+        {user && (
+          <div className="p-4 border-t border-slate-800 bg-slate-900">
+            <div className="flex items-center gap-3 mb-3">
+              {/* Avatar */}
+              <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-sm font-bold shadow-lg ring-2 ring-slate-800">
+                {getInitials(user.name)}
+              </div>
+
+              {/* Info Texto */}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-white truncate">
+                  {user.name}
+                </p>
+                <p className="text-xs text-slate-400 truncate capitalize">
+                  {user.role == "MECHANIC" ? "Mecánico" : "Administrador"}
+                </p>
+              </div>
+            </div>
+
+            {/* Botón Logout */}
+            <button
+              onClick={logout}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-red-400 bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-colors border border-transparent hover:border-red-500/30"
+            >
+              Cerrar sesión
+            </button>
+          </div>
+        )}
       </div>
     </aside>
   );
