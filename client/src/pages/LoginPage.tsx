@@ -37,7 +37,7 @@ export const LoginPage = () => {
       {/* Tarjeta del login */}
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
         <h2 className="mb-6 text-2xl font-bold text-center text-gray-800">
-          Taller Manager 🔧
+          FixFlow 🔧
         </h2>
 
         <form onSubmit={handleSubmit}>
