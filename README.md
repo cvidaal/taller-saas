@@ -72,7 +72,10 @@ Una vez ejecutado el script de Seeding, utiliza estas credenciales predefinidas 
 - **Email:** admin@google.com
 - **Contraseña:** 123456
 
+⚠️ Usuario de prueba sin datos reales. Proyecto únicamente demostrativo.
 ---
+
+
 
 ## 📸 Vista Previa del Proyecto
 
