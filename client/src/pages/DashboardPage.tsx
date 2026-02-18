@@ -13,7 +13,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export const DashboardPage = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
+  const [, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<DashBoardStats | null>(null);
 
@@ -34,7 +34,7 @@ export const DashboardPage = () => {
       }
 
       const data = await response.json();
-      setUser(data); // bien guardamoslos datos
+      setUser(data as User); // bien guardamoslos datos
     } catch (error) {
       console.error("Seguridad: Token falso detectado", error);
       localStorage.removeItem("token");

@@ -12,7 +12,7 @@ const prisma = new PrismaClient();
 // Middlewares
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: envs.CORS_ORIGINS,
   }),
 ); // Permite que el frontend (React) hable con el Backend
 app.use(express.json()); // Permite a tu servidor leer JSON
