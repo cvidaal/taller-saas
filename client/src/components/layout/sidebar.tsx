@@ -1,10 +1,17 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { getInitials } from "../../utils/getInitials";
+import { SearchBar } from "../SearchBar";
 
 export const Sidebar = () => {
   const location = useLocation();
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   const getLinkClass = (path: string) => {
     const isActive = location.pathname === path;
@@ -19,8 +26,13 @@ export const Sidebar = () => {
     <aside className="w-64 bg-gray-900 text-white h-screen flex flex-col">
       {/* Logo */}
       <div className="p-6 text-2xl font-bold text-center border-b border-gray-700">
-        Taller Manager 🔧
+        FixFlow 🔧
       </div>
+
+      {/* Buscador */}
+      <div className="px-3 py-3"></div>
+      <SearchBar />
+      <hr className="my-4 border-gray-700" />
 
       {/* 2. Navegación */}
       <nav className="flex-1 px-3 py-6 space-y-1">
@@ -59,7 +71,7 @@ export const Sidebar = () => {
 
             {/* Botón Logout */}
             <button
-              onClick={logout}
+              onClick={handleLogout}
               className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-red-400 bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-colors border border-transparent hover:border-red-500/30"
             >
               Cerrar sesión

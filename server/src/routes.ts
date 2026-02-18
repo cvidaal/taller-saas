@@ -6,6 +6,7 @@ import { JobRoutes } from "./presentation/job/routes";
 import { AuthRoutes } from "./presentation/auth/routes";
 import { AuthMiddleware } from "./presentation/middlewares/auth.middleware";
 import { DashboardRoutes } from "./presentation/dashboard/routes";
+import { SearchRoutes } from "./presentation/search/routes";
 
 export class AppRoutes {
   static get routes(): Router {
@@ -23,6 +24,7 @@ export class AppRoutes {
     router.use("/vehicles", VehicleRoutes.routes);
     router.use("/jobs", JobRoutes.routes);
     router.use("/dashboard/", DashboardRoutes.routes);
+    router.use("/search", SearchRoutes.routes);
 
     return router;
   }

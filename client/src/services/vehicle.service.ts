@@ -9,6 +9,15 @@ export interface UpdateVehicleData {
   licensePlate?: string;
 }
 
+export interface Vehicle {
+  id: string;
+  clientId: string;
+  brand: string;
+  model: string;
+  year: number;
+  licensePlate: string;
+}
+
 export interface CreateVehicleDto {
   brand: string;
   model: string;

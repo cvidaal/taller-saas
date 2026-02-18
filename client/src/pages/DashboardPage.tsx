@@ -69,16 +69,16 @@ export const DashboardPage = () => {
   }, []); // [] el array vacío es ejecuta solo al cargar la página.
 
   return (
-    <div className="p-8 min-h-screen">
-      {" "}
-      {/* Fondo gris suave para que resalten las tarjetas blancas */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Panel de Control</h1>
-        <p className="text-gray-500 mt-1">
+    <div className="p-4 sm:p-6 lg:p-8 min-h-screen">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+          Panel de Control
+        </h1>
+        <p className="text-gray-500 mt-1 text-sm sm:text-base">
           Resumen de la actividad de tu taller
         </p>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <ResumeCard
           title="Clientes"
           value={loading ? "..." : stats?.clients || 0}
