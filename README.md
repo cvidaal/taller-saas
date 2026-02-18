@@ -27,7 +27,7 @@ Sistema integral para la gestión de talleres mecánicos. Este proyecto permite 
 ### 1. Clonar el repositorio e instalar dependencias
 
 ```bash
-git clone <tu-url-de-github>
+git clone https://github.com/cvidaal/taller-manager
 cd taller-manager
 
 # Instalar dependencias del Cliente
