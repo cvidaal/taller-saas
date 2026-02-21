@@ -21,10 +21,20 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // 1. Leo el localstorage directamente al iniciar
   const [user, setUser] = useState<User | null>(() => {
-    const storedUser = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
+    try {
+      const storedUser = localStorage.getItem("user");
+      const token = localStorage.getItem("token");
 
-    return storedUser && token ? JSON.parse(storedUser) : null;
+      if (storedUser && token) {
+        return JSON.parse(storedUser);
+      }
+      return null;
+    } catch {
+      // Si hay datos corruptos en localStorage, limpiamos
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      return null;
+    }
   });
 
   const login = (userData: User, token: string) => {
