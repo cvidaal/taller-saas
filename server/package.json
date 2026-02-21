@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "tsnd --respawn --clear src/server.ts",
     "build": "rimraf ./dist && tsc",
+    "build:prod": "rimraf ./dist && tsc --sourceMap false --declaration false --declarationMap false",
     "start": "node dist/server.js",
     "seed": "ts-node src/data/seed.ts"
   },
