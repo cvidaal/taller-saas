@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: taller-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: taller_user
+      POSTGRES_PASSWORD: taller_pass
+      POSTGRES_DB: taller_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taller_user -d taller_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: taller-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DATABASE_URL=postgresql://taller_user:taller_pass@postgres:5432/taller_db
+      - DIRECT_URL=postgresql://taller_user:taller_pass@postgres:5432/taller_db
+      - JWT_SEED=your_secret_key_change_in_production
+      - CORS_ORIGINS=http://localhost:5173,http://localhost
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./server/prisma:/app/prisma:ro
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: taller-web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    environment:
+      - VITE_API_URL=http://localhost:3000/api/v1
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

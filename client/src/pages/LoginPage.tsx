@@ -11,12 +11,16 @@ export const LoginPage = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { login: loginContext } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading) return; // Prevenir doble submit
+
     setError(null);
+    setIsLoading(true);
 
     try {
       const data = await login(email, password);
@@ -27,6 +31,8 @@ export const LoginPage = () => {
       setError("Credenciales incorrectas");
       notify.error("Error al iniciar sesión");
       console.error(error);
+    } finally {
+      setIsLoading(false);
     }
   };
   return (
@@ -77,9 +83,14 @@ export const LoginPage = () => {
 
           <button
             type="submit"
-            className="w-full mt-4 px-4 py-2 font-bold text-white bg-blue-600 rounded hover:bg-blue-700 focus-outline-none"
+            disabled={isLoading}
+            className={`w-full mt-4 px-4 py-2 font-bold text-white rounded focus:outline-none transition-colors ${
+              isLoading
+                ? "bg-blue-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            }`}
           >
-            Entrar
+            {isLoading ? "Cargando..." : "Entrar"}
           </button>
         </form>
       </div>
